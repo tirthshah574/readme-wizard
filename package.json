@@ -1,0 +1,57 @@
+{
+  "name": "@tirth/readme-wizard-cli",
+  "version": "1.0.0",
+  "description": "An interactive CLI tool to generate README files for your projects using Google's Gemini AI",
+  "main": "bin/index.js",
+  "type": "module",
+  "bin": {
+    "readme-wizard": "./bin/index.js"
+  },
+  "scripts": {
+    "start": "node bin/index.js",
+    "prepare": "chmod +x bin/index.js"
+  },
+  "keywords": [
+    "readme",
+    "generator",
+    "cli",
+    "documentation",
+    "markdown",
+    "ai",
+    "gemini",
+    "google-ai",
+    "readme-generator",
+    "readme-wizard",
+    "project-documentation"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "homepage": "https://github.com/tirthGajjar/readme-wizard-cli#readme",
+  "bugs": {
+    "url": "https://github.com/tirthGajjar/readme-wizard-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tirthGajjar/readme-wizard-cli.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/readme-wizard-cli.git"
+  },
+  "dependencies": {
+    "@google/genai": "^0.14.0",
+    "@huggingface/inference": "^2.6.6",
+    "chalk": "^5.3.0",
+    "commander": "^13.1.0",
+    "dotenv": "^16.3.1",
+    "glob": "^10.3.10",
+    "inquirer": "^9.2.12",
+    "node-fetch": "^3.3.2"
+  }
+}
