@@ -64,16 +64,34 @@ async function getApiKey(options) {
     return savedKey;
   }
 
-  // Prompt user for API key
+  // Prompt user for API key with improved messaging
+  console.log(chalk.yellow('\nNo API key found. You need a Google Gemini API key to use this tool.'));
+  console.log(chalk.gray('You can get one for free at: https://aistudio.google.com/app/apikey\n'));
+
   const { apiKey } = await inquirer.prompt([{
     type: 'input',
     name: 'apiKey',
-    message: 'Please enter your Google Gemini API key (get it from https://aistudio.google.com/app/apikey):',
-    validate: input => input.length > 0 || 'API key is required'
+    message: 'Please enter your Google Gemini API key:',
+    validate: input => {
+      if (!input) return 'API key is required';
+      if (input.length < 10) return 'This doesn\'t look like a valid API key';
+      return true;
+    }
   }]);
 
-  // Save the API key for future use
-  await saveApiKey(apiKey);
+  // Ask if they want to save the key
+  const { saveKey } = await inquirer.prompt([{
+    type: 'confirm',
+    name: 'saveKey',
+    message: 'Would you like to save this API key for future use?',
+    default: true
+  }]);
+
+  if (saveKey) {
+    await saveApiKey(apiKey);
+    console.log(chalk.green('\nAPI key saved successfully! You won\'t need to enter it again.\n'));
+  }
+
   return apiKey;
 }
 
@@ -333,7 +351,7 @@ async function analyzeDockerSetup(projectInfo) {
         setup.volumes = Object.keys(compose.volumes || {});
         setup.networks = Object.keys(compose.networks || {});
       } catch (e) {
-        // Skip docker-compose analysis if parsing fails
+        // Skip silently if compose file can't be parsed
         setup.hasCompose = false;
       }
     }
@@ -360,34 +378,47 @@ async function analyzeCICD(projectInfo) {
   };
 
   try {
+    // Import yaml module
+    let yamlParser;
+    try {
+      yamlParser = await import('yaml');
+    } catch (e) {
+      console.warn(chalk.yellow('Warning: yaml module not available, skipping CI/CD analysis'));
+      return ciConfig;
+    }
+
     // Check GitHub Actions
     const githubWorkflows = await glob('.github/workflows/*.{yml,yaml}');
     if (githubWorkflows.length > 0) {
       ciConfig.provider = 'GitHub Actions';
       for (const workflow of githubWorkflows) {
         const content = await fs.readFile(workflow, 'utf8');
-        const { parse } = await import('yaml');
-        const parsed = parse(content);
-        ciConfig.workflows.push({
-          name: path.basename(workflow, path.extname(workflow)),
-          triggers: Object.keys(parsed.on || {})
-        });
-        
-        // Detect features
-        const jobs = Object.values(parsed.jobs || {});
-        const steps = jobs.flatMap(job => job.steps || []);
-        const stepNames = steps.map(step => step.name?.toLowerCase() || '');
-        
-        ciConfig.features.testing = stepNames.some(name => name.includes('test'));
-        ciConfig.features.building = stepNames.some(name => name.includes('build'));
-        ciConfig.features.deployment = stepNames.some(name => name.includes('deploy'));
-        ciConfig.features.dockerBuild = stepNames.some(name => name.includes('docker'));
-        ciConfig.features.codeQuality = stepNames.some(name => 
-          name.includes('lint') || name.includes('sonar') || name.includes('quality')
-        );
-        ciConfig.features.security = stepNames.some(name => 
-          name.includes('security') || name.includes('scan') || name.includes('snyk')
-        );
+        try {
+          const parsed = yamlParser.parse(content);
+          ciConfig.workflows.push({
+            name: path.basename(workflow, path.extname(workflow)),
+            triggers: Object.keys(parsed.on || {})
+          });
+          
+          // Detect features
+          const jobs = Object.values(parsed.jobs || {});
+          const steps = jobs.flatMap(job => job.steps || []);
+          const stepNames = steps.map(step => step.name?.toLowerCase() || '');
+          
+          ciConfig.features.testing = stepNames.some(name => name.includes('test'));
+          ciConfig.features.building = stepNames.some(name => name.includes('build'));
+          ciConfig.features.deployment = stepNames.some(name => name.includes('deploy'));
+          ciConfig.features.dockerBuild = stepNames.some(name => name.includes('docker'));
+          ciConfig.features.codeQuality = stepNames.some(name => 
+            name.includes('lint') || name.includes('sonar') || name.includes('quality')
+          );
+          ciConfig.features.security = stepNames.some(name => 
+            name.includes('security') || name.includes('scan') || name.includes('snyk')
+          );
+        } catch (e) {
+          // Skip this workflow if it can't be parsed
+          console.warn(chalk.yellow(`Warning: Could not parse workflow file: ${workflow}`));
+        }
       }
     }
 
@@ -396,9 +427,12 @@ async function analyzeCICD(projectInfo) {
     if (gitlabCI) {
       ciConfig.provider = 'GitLab CI';
       const content = await fs.readFile('.gitlab-ci.yml', 'utf8');
-      const { parse } = await import('yaml');
-      const parsed = parse(content);
-      ciConfig.workflows = Object.keys(parsed).filter(key => !key.startsWith('.')); // Filter out .variables etc
+      try {
+        const parsed = yamlParser.parse(content);
+        ciConfig.workflows = Object.keys(parsed).filter(key => !key.startsWith('.'));
+      } catch (e) {
+        console.warn(chalk.yellow('Warning: Could not parse .gitlab-ci.yml'));
+      }
     }
 
     // Check Circle CI
@@ -406,9 +440,12 @@ async function analyzeCICD(projectInfo) {
     if (circleCI) {
       ciConfig.provider = 'Circle CI';
       const content = await fs.readFile('.circleci/config.yml', 'utf8');
-      const { parse } = await import('yaml');
-      const parsed = parse(content);
-      ciConfig.workflows = Object.keys(parsed.workflows || {});
+      try {
+        const parsed = yamlParser.parse(content);
+        ciConfig.workflows = Object.keys(parsed.workflows || {});
+      } catch (e) {
+        console.warn(chalk.yellow('Warning: Could not parse CircleCI config'));
+      }
     }
 
     return ciConfig;
@@ -541,20 +578,34 @@ async function analyzeProject() {
 }
 
 async function generateAIContent(projectInfo) {
-  // Get API key through the unified API key management
-  const apiKey = await getApiKey(program.opts());
+  try {
+    // Get API key through the unified API key management
+    const apiKey = await getApiKey(program.opts());
 
-  const ai = new GoogleGenAI({ apiKey });
+    if (!apiKey) {
+      console.error(chalk.red('\nError: No API key provided.'));
+      console.log(chalk.gray('You can get a free API key at: https://aistudio.google.com/app/apikey'));
+      process.exit(1);
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    
+    // Generate badges
+    let commonBadges, frameworkBadges;
+    try {
+      commonBadges = await generateBadges(projectInfo);
+      frameworkBadges = await analyzeProjectType(projectInfo);
+    } catch (error) {
+      console.warn(chalk.yellow('\nWarning: Could not generate some badges, continuing with minimal badges.'));
+      commonBadges = '';
+      frameworkBadges = '';
+    }
+    
+    // Add badges to project info
+    projectInfo.badges = `${commonBadges}\n${frameworkBadges}`;
   
-  // Generate badges
-  const commonBadges = await generateBadges(projectInfo);
-  const frameworkBadges = await analyzeProjectType(projectInfo);
-  
-  // Add badges to project info
-  projectInfo.badges = `${commonBadges}\n${frameworkBadges}`;
-  
-  const techStackInfo = JSON.stringify(projectInfo.techStack, null, 2);
-  const prompt = `Generate a beautiful, modern, and comprehensive README.md that follows best practices for a ${projectInfo.projectType} project named "${projectInfo.projectName}". Make it visually appealing with strategic use of badges, emojis, and formatting.
+    const techStackInfo = JSON.stringify(projectInfo.techStack, null, 2);
+    const prompt = `Generate a beautiful, modern, and comprehensive README.md that follows best practices for a ${projectInfo.projectType} project named "${projectInfo.projectName}". Make it visually appealing with strategic use of badges, emojis, and formatting.
 
 Project Analysis:
 ${JSON.stringify({
@@ -639,26 +690,46 @@ Style Guidelines:
 
 Make the README professional, comprehensive, and maintainable while following the Standard-README specification and modern documentation best practices.`;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt
-    });
-    
-    // Clean up the response text:
-    // 1. Remove any ```markdown blocks
-    // 2. Remove any extra backtick blocks at the start/end
-    // 3. Preserve actual code blocks within the content
-    let cleanedText = response.text
-      .replace(/^```markdown\n/, '') // Remove opening ```markdown
-      .replace(/\n```$/, '') // Remove closing ```
-      .replace(/^````markdown\n/, '') // Remove opening ````markdown
-      .replace(/\n````$/, ''); // Remove closing ````
-    
-    return cleanedText;
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt
+      });
+      
+      // Clean up the response text:
+      // 1. Remove any ```markdown blocks
+      // 2. Remove any extra backtick blocks at the start/end
+      // 3. Preserve actual code blocks within the content
+      let cleanedText = response.text
+        .replace(/^```markdown\n/, '') // Remove opening ```markdown
+        .replace(/\n```$/, '') // Remove closing ```
+        .replace(/^````markdown\n/, '') // Remove opening ````markdown
+        .replace(/\n````$/, ''); // Remove closing ````
+      
+      if (!cleanedText || cleanedText.trim().length === 0) {
+        throw new Error('Generated content is empty');
+      }
+
+      return cleanedText;
+    } catch (error) {
+      console.error(chalk.red('\nError generating README content:'), error.message);
+      if (error.response?.status === 401) {
+        console.log(chalk.yellow('\nThis might be due to an invalid API key. Please try clearing your saved configuration:'));
+        console.log(chalk.gray('readme-wizard --clear-config'));
+        console.log(chalk.gray('Then run the tool again with a valid API key.'));
+      } else {
+        console.log(chalk.yellow('\nPlease try again. If the problem persists, you can:'));
+        console.log(chalk.gray('1. Check your internet connection'));
+        console.log(chalk.gray('2. Verify your API key at https://aistudio.google.com/app/apikey'));
+        console.log(chalk.gray('3. Try running with a new API key using: readme-wizard -k YOUR_NEW_API_KEY'));
+      }
+      process.exit(1);
+    }
   } catch (error) {
-    console.error(chalk.red('Error generating AI content:'), error);
-    throw error;
+    console.error(chalk.red('\nFatal error:'), error.message);
+    console.log(chalk.yellow('\nPlease try again with a valid Google Gemini API key:'));
+    console.log(chalk.gray('readme-wizard -k YOUR_API_KEY'));
+    process.exit(1);
   }
 }
 
