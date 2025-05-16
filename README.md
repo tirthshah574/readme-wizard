@@ -1,164 +1,192 @@
-```markdown
-# ✨ readme-wizard-cli
+# Readme Wizard CLI 🧙‍♂️
 
-[![npm version](https://img.shields.io/npm/v/@tirth.s/readme-wizard-cli.svg)](https://www.npmjs.com/package/@tirth.s/readme-wizard-cli)
-[![Node version](https://img.shields.io/node/v/@tirth.s/readme-wizard-cli.svg)](https://www.npmjs.com/package/@tirth.s/readme-wizard-cli)
-[![License](https://img.shields.io/npm/l/@tirth.s/readme-wizard-cli.svg)](https://github.com/tirthshah574/readme-wizard/blob/main/LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://semver.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D%2018.0.0-brightgreen.svg)](https://nodejs.org)
 
-An AI-powered CLI tool that automatically generates high-quality README files for your projects using Google's Gemini AI. This tool analyzes your project structure, dependencies, and configuration to create comprehensive, well-structured documentation.
+A powerful CLI tool that uses Google's Gemini AI to generate comprehensive, well-structured README files for your projects. Analyzes your project structure and creates beautiful documentation with zero configuration.
 
-🔗 [View on npm](https://www.npmjs.com/package/@tirth.s/readme-wizard-cli)
+## 🚀 Features
 
----
+- 🤖 AI-powered README generation using Google's Gemini
+- 📊 Automatic project analysis (dependencies, frameworks, testing setup)
+- 🏗️ Docker and CI/CD configuration detection
+- 🎯 Smart badge generation based on your tech stack
+- 🔑 Multiple API key management options
+- 🎨 Beautiful, standardized formatting
+- 📝 Interactive CLI with customization options
+- 💾 Saves configuration for future use
 
-## 📁 Project Structure
-
-```
-readme-creator/
-├── .env                # Environment variable configuration
-├── .gitignore          # Specifies intentionally untracked files that Git should ignore
-├── index.js            # Main entry point of the application
-├── package.json        # Project dependencies and scripts
-├── README.md           # This file!
-└── src/
-    ├── commands/     # Command-line interface commands (if any)
-    ├── lib/          # Core libraries and functions
-    └── utils/         # Utility functions
-```
-
----
-
-## ⚙️ Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-*   **Node.js:** Version 18 or higher.  ([https://nodejs.org/](https://nodejs.org/))
-*   **npm:** Version 8 or higher (usually comes with Node.js)
-*   **Git:** For version control.  ([https://git-scm.com/](https://git-scm.com/))
-
----
-
-## 🚀 Getting Started
-
-You can use this tool in two ways:
-
-### Using npx (Recommended)
-
-Run it directly without installation:
+## 📦 Installation
 
 ```bash
+# Install globally
+npm install -g @tirth.s/readme-wizard-cli
+
+# Or run directly with npx
 npx @tirth.s/readme-wizard-cli
 ```
 
-Or with your API key:
+## 🛠️ Prerequisites
 
-```bash
-npx @tirth.s/readme-wizard-cli -k "YOUR_API_KEY"
-```
+- Node.js >= 18
+- Google Gemini API Key (get one for free at [AI Studio](https://aistudio.google.com/app/apikey))
 
-### Global Installation
+## 📘 Usage
 
-If you prefer, you can install it globally:
+### Basic Usage
 
-```bash
-npm install -g @tirth.s/readme-wizard-cli
-```
-
-Then run it from anywhere:
+Run in your project directory:
 
 ```bash
 readme-wizard
 ```
 
-3.  **Set up environment variables:** (See 🔑 Environment Variables)
+The tool will:
+1. Analyze your project structure
+2. Detect frameworks and dependencies
+3. Prompt for missing information
+4. Generate a comprehensive README.md
 
-4.  **Run the application:**
+### Command Line Options
 
-    While this program does not provide a command-line interface, the exact execution will require knowing the exact workings.  The following is hypothetical.
+```bash
+Usage: readme-wizard [options]
 
-    ```bash
-    node index.js <arguments-here>
-    ```
-    *Replace `<arguments-here>` with the appropriate arguments for your use case.*  Check the `package.json` or the source code for specific CLI arguments.
+Options:
+  -V, --version          Output the version number
+  -k, --api-key <key>    Google Gemini API key
+  --clear-config         Clear saved configuration including API key
+  -h, --help            Display help
 
----
+Examples:
+  $ readme-wizard                    # Interactive mode
+  $ readme-wizard -k YOUR_API_KEY    # Run with API key
+  $ readme-wizard --clear-config     # Clear saved configuration
+```
 
-## 🔑 API Key Setup
+### API Key Management
 
-The tool requires a Google AI (Gemini) API key. You can provide it in several ways:
+The tool supports multiple ways to provide your Google Gemini API key:
 
-1. **Command Line Flag:**
+1. **Command Line Flag**:
    ```bash
-   readme-wizard --api-key "your-api-key"
+   readme-wizard -k YOUR_API_KEY
    ```
 
-2. **Environment Variable:**
-   Create a `.env` file in your project or set the environment variable:
+2. **Environment Variable**:
    ```bash
-   export GOOGLE_API_KEY=your-api-key
+   export GOOGLE_API_KEY=your_api_key
+   readme-wizard
    ```
 
-3. **Interactive Prompt:**
-   If no API key is provided, the tool will prompt you to enter it and optionally save it for future use.
+3. **Interactive Prompt**:
+   Run without a key and you'll be prompted to enter it.
 
-4. **Saved Configuration:**
-   If you choose to save your API key, it will be stored in `~/.readme-wizard/config.json`.
-   To clear saved configuration:
-   ```bash
-   readme-wizard --clear-config
-   ```
+4. **Saved Configuration**:
+   The tool can save your API key securely for future use.
 
-To get an API key, visit: https://aistudio.google.com/app/apikey
+### Project Analysis
 
-**Note:** Replace `your_google_api_key` and `your_huggingface_api_key` with your actual API keys.  Ensure that the `.env` file is added to your `.gitignore` to prevent accidental commit of secrets.
+The tool automatically analyzes your project for:
 
----
+- 📝 Project metadata (name, version, license)
+- 🛠️ Dependencies and frameworks
+- ⚡ Testing setup and coverage
+- 🐳 Docker configuration
+- 🔄 CI/CD pipelines
+- 📚 Documentation tools
+- 🎨 UI libraries
+- 🗄️ Database connections
+- 📦 State management
+- 🌐 API integrations
 
-## 📦 Dependencies
+### Generated README Structure
 
-This project relies on the following dependencies:
+The generated README follows the [Standard-README](https://github.com/RichardLitt/standard-readme) specification and includes:
 
-*   `@google/genai`: For interacting with Google AI models.
-*   `@huggingface/inference`: For using Hugging Face Inference API.
-*   `chalk`: For adding colors to the console output.
-*   `commander`: For building command-line interfaces.
-*   `dotenv`: For loading environment variables from a `.env` file.
-*   `glob`: For matching file paths using wildcard patterns.
-*   `inquirer`: For creating interactive command-line prompts.
-*   `node-fetch`: For making HTTP requests.
+1. **Title & Description**
+   - Project name and banner
+   - Concise description
+   - Status badges
 
----
+2. **Table of Contents**
+   - Auto-generated
+   - Collapsible sections
 
-## 🛠️ Troubleshooting
+3. **Installation**
+   - Prerequisites
+   - Step-by-step guide
+   - Environment setup
 
-**Issue:**  `Error: Cannot find module '...'`
+4. **Usage**
+   - Basic examples
+   - Common use cases
+   - API documentation
 
-**Solution:**  Ensure you have installed all dependencies by running `npm install`.  If the issue persists, try deleting `node_modules` and `package-lock.json` and then running `npm install` again.
+5. **Project Architecture**
+   - Structure overview
+   - Component interaction
+   - Key features
 
-**Issue:** API requests are failing.
+6. **Development**
+   - Setup guide
+   - Testing
+   - Contributing
 
-**Solution:** Double-check that your API keys in the `.env` file are correct and that you have enabled the necessary APIs in your cloud provider account.
+7. **Maintenance**
+   - Issue reporting
+   - Troubleshooting
+   - Support
 
----
+8. **License & Credits**
+   - License details
+   - Contributors
+   - Acknowledgments
 
-## 📜 Available Scripts
+## 💡 Tips & Tricks
 
-The following scripts are defined in `package.json`:
+1. **Overwriting Existing README**:
+   - The tool will ask before overwriting an existing README
+   - You can choose to create a new file instead
 
-*   `test`: Runs the test suite.  *(Note: This project does not appear to have tests set up.)*
+2. **Project Analysis**:
+   - Run in the root directory of your project
+   - Make sure package.json is present for best results
 
-    ```bash
-    npm run test
-    ```
+3. **API Key Storage**:
+   - Keys are stored in `~/.readme-wizard/config.json`
+   - Use `--clear-config` to remove stored keys
 
----
+4. **Badge Generation**:
+   - Automatic framework version detection
+   - Test status badges if tests exist
+   - License and version badges from package.json
 
-## 🌐 API Endpoints (Hypothetical)
+## 🤝 Contributing
 
-*(As no API endpoints are documented in the project information, this section is intentionally left blank. If the project exposes any API endpoints, they should be documented here with details like URL, method, request parameters, and response format.)*
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
----
+```bash
+# Clone the repository
+git clone https://github.com/tirthshah574/readme-wizard.git
 
-## ❤️ Contributing
+# Install dependencies
+cd readme-wizard
+npm install
 
-While no formal contributing guidelines are present, you can contact the project owners if you're interested.
+# Make your changes and test
+npm test
+
+# Submit a PR
+```
+
+## 📃 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Google Gemini AI](https://deepmind.google/technologies/gemini/) for powering the content generation
+- [Shields.io](https://shields.io) for the beautiful badges
+- All the amazing contributors who help improve this tool
