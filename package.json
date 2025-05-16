@@ -1,6 +1,6 @@
 {
   "name": "@tirth.s/readme-wizard-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An interactive CLI tool to generate README files for your projects using Google's Gemini AI",
   "main": "bin/index.js",
   "type": "module",
