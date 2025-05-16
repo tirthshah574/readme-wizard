@@ -1,7 +1,13 @@
 ```markdown
-# ✨ readme-creator
+# ✨ readme-wizard-cli
 
-A tool to automatically generate high-quality README.md files for your projects. While its exact purpose is not immediately knowable from just the project name, it simplifies the often tedious process of documentation, ensuring consistent and informative READMEs.
+[![npm version](https://img.shields.io/npm/v/@tirth.s/readme-wizard-cli.svg)](https://www.npmjs.com/package/@tirth.s/readme-wizard-cli)
+[![Node version](https://img.shields.io/node/v/@tirth.s/readme-wizard-cli.svg)](https://www.npmjs.com/package/@tirth.s/readme-wizard-cli)
+[![License](https://img.shields.io/npm/l/@tirth.s/readme-wizard-cli.svg)](https://github.com/tirthshah574/readme-wizard/blob/main/LICENSE)
+
+An AI-powered CLI tool that automatically generates high-quality README files for your projects using Google's Gemini AI. This tool analyzes your project structure, dependencies, and configuration to create comprehensive, well-structured documentation.
+
+🔗 [View on npm](https://www.npmjs.com/package/@tirth.s/readme-wizard-cli)
 
 ---
 
@@ -34,20 +40,35 @@ Before you begin, ensure you have the following installed:
 
 ## 🚀 Getting Started
 
-Follow these steps to get `readme-creator` up and running:
+You can use this tool in two ways:
 
-1.  **Clone the repository:**
+### Using npx (Recommended)
 
-    ```bash
-    git clone <your-repository-url>
-    cd readme-creator
-    ```
+Run it directly without installation:
 
-2.  **Install dependencies:**
+```bash
+npx @tirth.s/readme-wizard-cli
+```
 
-    ```bash
-    npm install
-    ```
+Or with your API key:
+
+```bash
+npx @tirth.s/readme-wizard-cli -k "YOUR_API_KEY"
+```
+
+### Global Installation
+
+If you prefer, you can install it globally:
+
+```bash
+npm install -g @tirth.s/readme-wizard-cli
+```
+
+Then run it from anywhere:
+
+```bash
+readme-wizard
+```
 
 3.  **Set up environment variables:** (See 🔑 Environment Variables)
 

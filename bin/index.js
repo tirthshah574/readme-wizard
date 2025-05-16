@@ -327,13 +327,14 @@ async function analyzeDockerSetup(projectInfo) {
     if (setup.hasCompose) {
       const composeContent = await fs.readFile(dockerComposeFiles[0], 'utf8');
       try {
-        const yaml = require('yaml');
-        const compose = yaml.parse(composeContent);
+        const { parse } = await import('yaml');
+        const compose = parse(composeContent);
         setup.services = Object.keys(compose.services || {});
         setup.volumes = Object.keys(compose.volumes || {});
         setup.networks = Object.keys(compose.networks || {});
       } catch (e) {
-        console.warn(chalk.yellow('Could not parse docker-compose.yml'));
+        // Skip docker-compose analysis if parsing fails
+        setup.hasCompose = false;
       }
     }
 
@@ -365,8 +366,8 @@ async function analyzeCICD(projectInfo) {
       ciConfig.provider = 'GitHub Actions';
       for (const workflow of githubWorkflows) {
         const content = await fs.readFile(workflow, 'utf8');
-        const yaml = require('yaml');
-        const parsed = yaml.parse(content);
+        const { parse } = await import('yaml');
+        const parsed = parse(content);
         ciConfig.workflows.push({
           name: path.basename(workflow, path.extname(workflow)),
           triggers: Object.keys(parsed.on || {})
@@ -395,8 +396,8 @@ async function analyzeCICD(projectInfo) {
     if (gitlabCI) {
       ciConfig.provider = 'GitLab CI';
       const content = await fs.readFile('.gitlab-ci.yml', 'utf8');
-      const yaml = require('yaml');
-      const parsed = yaml.parse(content);
+      const { parse } = await import('yaml');
+      const parsed = parse(content);
       ciConfig.workflows = Object.keys(parsed).filter(key => !key.startsWith('.')); // Filter out .variables etc
     }
 
@@ -405,8 +406,8 @@ async function analyzeCICD(projectInfo) {
     if (circleCI) {
       ciConfig.provider = 'Circle CI';
       const content = await fs.readFile('.circleci/config.yml', 'utf8');
-      const yaml = require('yaml');
-      const parsed = yaml.parse(content);
+      const { parse } = await import('yaml');
+      const parsed = parse(content);
       ciConfig.workflows = Object.keys(parsed.workflows || {});
     }
 
